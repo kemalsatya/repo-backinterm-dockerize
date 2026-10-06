@@ -1,5 +1,6 @@
-import app from "@/app";
+import { Hono } from "hono"
+const router = new Hono()
 
-// app.route("/", ...)
+router.get("/", (c)=>c.text('halo'))
 
-export default app
+export default router
