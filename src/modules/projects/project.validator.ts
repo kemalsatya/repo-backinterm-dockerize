@@ -7,4 +7,10 @@ const projectSchema = z.object({
 });
 
 export const createProjectSchema = projectSchema.omit({ projectId: true });
-export const updateProjectSchema = projectSchema.partial();
+export const updateProjectSchema = createProjectSchema.partial();
+
+export const paramIdSchema = z.object({
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")
+});
+
+export type updateProjectDTO = z.infer<typeof updateProjectSchema>
