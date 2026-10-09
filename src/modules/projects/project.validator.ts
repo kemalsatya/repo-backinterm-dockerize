@@ -1,7 +1,7 @@
 import z from "zod";
 
 const projectSchema = z.object({
-    projectId: z.string(),
+    projectId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid"),
     name: z.string().min(1, "name wajib diisi"),
     description: z.string().optional()
 });
