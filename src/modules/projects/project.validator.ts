@@ -13,4 +13,5 @@ export const paramIdSchema = z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")
 });
 
+export type createProjectDTO = z.infer<typeof createProjectSchema>
 export type updateProjectDTO = z.infer<typeof updateProjectSchema>

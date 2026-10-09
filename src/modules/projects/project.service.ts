@@ -1,8 +1,7 @@
-import mongoose from "mongoose"
 import { projectModel } from "./project.model"
-import type { updateProjectDTO } from "./project.validator"
+import type { createProjectDTO, updateProjectDTO } from "./project.validator"
 
-export const createProject = async (newProjectData: object) => {
+export const createProject = async (newProjectData: createProjectDTO) => {
     const project = await projectModel.create(newProjectData)
     return project
 }
@@ -18,15 +17,17 @@ export const getProjectById = async (projectId: string) => {
 }
 
 export const deleteProjectById = async (projectId: string) => {
-    const projectDeleted = await projectModel.findByIdAndDelete(projectId).lean();
-    if (!projectDeleted) {
+    const deletedProject = await projectModel.findByIdAndDelete(projectId).lean();
+    if (!deletedProject
+
+    ) {
         throw new Error("Project tidak tersedia sejak awal")
     }
-    return projectDeleted
+    return deletedProject
 }
 
 export const updateProjectById = async (projectId: string, data: updateProjectDTO) => {
-    const projectUpdated = await projectModel.findByIdAndUpdate(projectId, data, {new: true})
-    if (!projectUpdated){ throw new Error("Project tidak tersedia")}
-    return projectUpdated
+    const updatedProject = await projectModel.findByIdAndUpdate(projectId, data, {new: true})
+    if (!updatedProject){ throw new Error("Project tidak tersedia")}
+    return updatedProject
 }
