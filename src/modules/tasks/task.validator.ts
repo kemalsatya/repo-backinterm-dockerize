@@ -12,7 +12,7 @@ const taskSchema = z.object({
     taskId: z.string(),
     title: z.string(),
     status: z.enum(["todo", "in progress", "completed"]).default("todo"),
-    assignedTo: z.string().optional(),
+    assignedTo: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid").optional(),
     subTask: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")).optional(),
     description: z.string().optional(),
     priority: z.enum(["low", "medium", "high"]).default("low"),
@@ -23,8 +23,12 @@ const taskSchema = z.object({
     updatedAt: z.date()
 })
 
+export const assignTaskSchema = z.object({
+    userId: z.string()
+})
+
 export const createTaskSchema = taskSchema.omit({taskId: true, history: true, createdAt: true, updatedAt: true})
-export const updateTaskSchema = createTaskSchema
+export const updateTaskSchema = createTaskSchema.partial()
 
 export type createTaskDTO = z.infer<typeof createTaskSchema>
 export type updateTaskDTO = z.infer<typeof updateTaskSchema>

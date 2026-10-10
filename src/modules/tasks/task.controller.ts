@@ -1,11 +1,11 @@
 import type { Context } from "hono";
 import * as service from './task.service'
+import * as userService from '@/modules/users/users.service'
 import * as util from "@/utils/response.util"
 import { paramIdSchema } from "@/modules/projects/project.validator";
-import { createTaskSchema } from "./task.validator";
+import { assignTaskSchema, createTaskSchema } from "./task.validator";
 import { paginationLinks } from "@/utils/response.util";
 import { paginationQuerySchema } from "@/utils/pagination.util";
-
 import { link } from "@/utils/hateoas.util";
 
 const taskLinks = (taskId: string, projectId: string) => [
@@ -15,7 +15,6 @@ const taskLinks = (taskId: string, projectId: string) => [
   link.collection('/api/tasks'),
   link.rel('project', `/api/projects/${projectId}`), // relasi ke parent project
 ];
-
 
 export const createTaskHandler = async (c: Context) => {
     try {
@@ -66,6 +65,22 @@ export const deleteSpesificTaskHandler = async (c:Context) => {
         const {id: idTaskRequested} = paramIdSchema.parse(c.req.param())
         const deletedTask = await service.deleteTaskById(idTaskRequested)
         return util.successResponse(c, deletedTask, "Task telah berhasil dihapus")
+    } catch (error: any) {
+        return util.errorResponse(c, error.message, error.cause?.status)
+    }
+}
+
+export const assignSpesificTaskHandler = async (c: Context) => {
+    try {
+        const { id: taskId } = paramIdSchema.parse(c.req.param())
+        const body = await c.req.json()
+        const { userId } = assignTaskSchema.parse(body)
+
+        const isExist = userService.checkUserById(userId)
+        if(!isExist) throw new Error("user tidak ditemukan", {cause: {status: 404}})
+
+        const updatedTask = await service.updateAssignTask(taskId, userId)
+        return util.successResponseHT(c, updatedTask, taskLinks(updatedTask.id, updatedTask.projectId.toString()))
     } catch (error: any) {
         return util.errorResponse(c, error.message, error.cause?.status)
     }
