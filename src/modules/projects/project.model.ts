@@ -5,7 +5,7 @@ const projectSchema = new Schema({
     description: { type: String },
 },
     {
-        timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+        timestamps: true
     }    
 )
 

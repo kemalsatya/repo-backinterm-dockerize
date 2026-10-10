@@ -4,6 +4,8 @@ import router from '@/routes'
 const app = new Hono()
 
 // Mount routes
-app.route("/", router)
+app.get("/", (c) => c.text("berhasil"))
+
+app.route("/api", router)
 
 export default app
