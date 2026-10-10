@@ -7,7 +7,7 @@ const taskRoutes = new Hono()
 taskRoutes.get("/", controller.getAllTaskHandler)
 
 // create a task
-taskRoutes.get("/", controller.createTaskHandler)
+taskRoutes.post("/", controller.createTaskHandler)
 
 // get spesific task
 taskRoutes.get("/:id", controller.getSpesificTaskHandler)
