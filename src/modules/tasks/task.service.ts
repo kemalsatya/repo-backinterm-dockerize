@@ -6,26 +6,33 @@ export const createTask = async (data: createTaskDTO) => {
     return task
 }
 
-export const getAllTask = async () => {
-    const tasks = await taskModel.find().lean()
-    return tasks
+export const getAllTask = async (page: number = 1, limit: number = 10) => {
+    const skip = (page-1) * limit
+    const [tasks, totalItems] = await Promise.all([
+        taskModel.find().skip(skip).limit(limit).lean(),
+        taskModel.countDocuments()
+    ])
+
+    const totalPages = Math.ceil(totalItems / limit)
+    return {tasks, totalItems, totalPages, currentPage: page, limit}
 }
 
 export const getTaskById = async (taskId: string) => {
     const task = await taskModel.findById(taskId).lean()
+    if(!task) throw new Error("Task tidak tersedia sejak awal", {cause: {status: 404}})
     return task
 }
 
 export const deleteTaskById = async (taskId: string) => {
     const deletedTask = await taskModel.findByIdAndDelete(taskId).lean()
     if (!deletedTask) {
-        throw new Error("Task tidak tersedia sejak awal")
+        throw new Error("Task tidak tersedia sejak awal", {cause: {status: 404}})
     }
     return deletedTask
 }
 
 export const updateTaskById = async (taskId: string, data: updateTaskDTO) => {
     const updatedTask = await taskModel.findByIdAndUpdate(taskId, data, {new: true})
-    if (!updatedTask) throw new Error("Task tidak tersedia")
+    if (!updatedTask) throw new Error("Task tidak tersedia", {cause: {status: 404}})
     return updatedTask
 }
