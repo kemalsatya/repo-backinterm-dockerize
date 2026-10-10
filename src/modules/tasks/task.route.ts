@@ -18,5 +18,8 @@ taskRoutes.patch("/:id", controller.updateSpesificTaskHandler)
 // delete spesific task
 taskRoutes.delete("/:id", controller.deleteSpesificTaskHandler)
 
+// assign assignee to task
+taskRoutes.patch("/:id/assign", controller.assignSpesificTaskHandler)
+
 export default taskRoutes
 

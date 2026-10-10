@@ -3,11 +3,12 @@ import z from "zod";
 const projectSchema = z.object({
     projectId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid"),
     name: z.string().min(1, "name wajib diisi"),
-    description: z.string().optional()
+    description: z.string().optional(),
+    createdBy: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")
 });
 
 export const createProjectSchema = projectSchema.omit({ projectId: true });
-export const updateProjectSchema = createProjectSchema.partial();
+export const updateProjectSchema = createProjectSchema.partial().omit({ createdBy: true });
 
 export const paramIdSchema = z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")

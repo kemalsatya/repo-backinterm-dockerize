@@ -36,3 +36,9 @@ export const updateTaskById = async (taskId: string, data: updateTaskDTO) => {
     if (!updatedTask) throw new Error("Task tidak tersedia", {cause: {status: 404}})
     return updatedTask
 }
+
+export const updateAssignTask = async (taskId: string, userId: string) => {
+    const assignedTask = await taskModel.findByIdAndUpdate(taskId, {assignedTo: userId}, {new: true})
+    if (!assignedTask) throw new Error("Task tidak tersedia", {cause: {status: 404}})
+    return assignedTask
+}
