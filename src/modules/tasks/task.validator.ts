@@ -17,14 +17,14 @@ const taskSchema = z.object({
     description: z.string().optional(),
     priority: z.enum(["low", "medium", "high"]).default("low"),
     tags: z.string().optional(),
-    dueDate: z.date().optional(),
+    dueDate: z.coerce.date().optional(),
     history: taskHistorySchema.optional(),
     createdAt: z.date(),
     updatedAt: z.date()
 })
 
 export const assignTaskSchema = z.object({
-    userId: z.string()
+    userId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")
 })
 
 export const createTaskSchema = taskSchema.omit({taskId: true, history: true, createdAt: true, updatedAt: true})

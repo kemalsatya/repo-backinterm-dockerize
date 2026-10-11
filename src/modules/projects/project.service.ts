@@ -31,7 +31,7 @@ export const deleteProjectById = async (projectId: string) => {
 }
 
 export const updateProjectById = async (projectId: string, data: updateProjectDTO) => {
-    const updatedProject = await projectModel.findByIdAndUpdate(projectId, data, {new: true})
+    const updatedProject = await projectModel.findByIdAndUpdate(projectId, data, {returnDocument: 'after'})
     if (!updatedProject){ throw new Error("Project tidak tersedia", {cause: {status: 404}})}
     return updatedProject
 }

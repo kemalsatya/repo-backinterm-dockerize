@@ -76,11 +76,11 @@ export const assignSpesificTaskHandler = async (c: Context) => {
         const body = await c.req.json()
         const { userId } = assignTaskSchema.parse(body)
 
-        const isExist = userService.checkUserById(userId)
+        const isExist = await userService.checkUserById(userId)
         if(!isExist) throw new Error("user tidak ditemukan", {cause: {status: 404}})
 
         const updatedTask = await service.updateAssignTask(taskId, userId)
-        return util.successResponseHT(c, updatedTask, taskLinks(updatedTask.id, updatedTask.projectId.toString()))
+        return util.successResponseHT(c, updatedTask, taskLinks(updatedTask.id, updatedTask.projectId.toString()), "task berhasil diassign")
     } catch (error: any) {
         return util.errorResponse(c, error.message, error.cause?.status)
     }
