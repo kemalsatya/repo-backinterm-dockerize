@@ -18,4 +18,6 @@ projectRoutes.patch("/:id", controller.updateProjectHandler)
 // delete spesific project
 projectRoutes.delete("/:id", controller.deleteSpecificProjectHandler)
 
+// get tasks by projectId
+
 export default projectRoutes

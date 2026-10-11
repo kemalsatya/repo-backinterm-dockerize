@@ -4,7 +4,7 @@ import app from "@/app";
 
 await connectMongoDB();
 
-console.log(`Server is running at http://localhost:${env.port}`);
+console.log(`[LOG] Server is running at http://localhost:${env.port}`);
 
 Bun.serve({
     fetch: app.fetch,

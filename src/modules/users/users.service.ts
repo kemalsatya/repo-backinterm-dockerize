@@ -1,5 +1,10 @@
 import { userModel } from "./users.model";
-import type { updateUserDTO } from "./users.validator";
+import type { createUserDTO, updateUserDTO } from "./users.validator";
+
+export const createUser = async (data: createUserDTO) => {
+    const user = await userModel.create(data)
+    return user
+}
 
 export const checkUserById = async (userId: string) => {
     const user = await userModel.findById(userId).lean()
@@ -24,7 +29,7 @@ export const getAllUsers = async () => {
 }
 
 export const updateUser = async (userId: string, data: updateUserDTO) => {
-    const updatedUser = await userModel.findByIdAndUpdate(userId, data, {new: true})
+    const updatedUser = await userModel.findByIdAndUpdate(userId, data, {returnDocument: 'after'})
     if (!updatedUser) throw new Error("data user tidak ditemukan", {cause: {status: 404}})
     return updatedUser 
 }

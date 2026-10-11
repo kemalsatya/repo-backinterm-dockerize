@@ -32,13 +32,13 @@ export const deleteTaskById = async (taskId: string) => {
 }
 
 export const updateTaskById = async (taskId: string, data: updateTaskDTO) => {
-    const updatedTask = await taskModel.findByIdAndUpdate(taskId, data, {new: true})
+    const updatedTask = await taskModel.findByIdAndUpdate(taskId, data, {returnDocument: 'after'})
     if (!updatedTask) throw new Error("Task tidak tersedia", {cause: {status: 404}})
     return updatedTask
 }
 
 export const updateAssignTask = async (taskId: string, userId: string) => {
-    const assignedTask = await taskModel.findByIdAndUpdate(taskId, {assignedTo: userId}, {new: true})
+    const assignedTask = await taskModel.findByIdAndUpdate(taskId, {assignedTo: userId}, {returnDocument: 'after'})
     if (!assignedTask) throw new Error("Task tidak tersedia", {cause: {status: 404}})
     return assignedTask
 }
