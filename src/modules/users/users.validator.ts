@@ -7,4 +7,5 @@ export const userSchema = z.object({
 
 export const updateUserSchema = userSchema.partial()
 
+export type createUserDTO = z.infer<typeof userSchema>
 export type updateUserDTO = z.infer<typeof updateUserSchema>

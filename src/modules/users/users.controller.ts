@@ -6,12 +6,23 @@ import { userSchema, updateUserSchema } from './users.validator';
 import { paramIdSchema } from '../projects/project.validator';
 
 const userLinks = (userId: string) => [
-  link.self(`/api/users/${userId}`),
+//   link.self(`/api/users/${userId}`),
   link.update(`/api/users/${userId}`),
   link.delete(`/api/users/${userId}`),
   link.collection('/api/users'),
   link.rel('tasks', `/api/tasks?assignedTo=${userId}`), // relasi ke task
 ];
+
+export const createUserHandler = async (c: Context) => {
+    try {
+        const body = await c.req.json()
+        const validData = userSchema.parse(body)
+        const createdUser = await service.createUser(validData)
+        return util.successResponseHT(c, createdUser, userLinks(createdUser.id), "user berhasil dibuat", 201)
+    } catch (error: any) {
+        return util.errorResponse(c, error.message)
+    }
+}
 
 export const getUsersHandler = async (c: Context) => {
     try {
@@ -38,7 +49,7 @@ export const getSpesificUserHandler = async (c: Context) => {
 export const updateSpesificUserHandler = async (c: Context) => {
     try {
         const { id: userId } = paramIdSchema.parse(c.req.param())
-        const body = c.req.json()
+        const body = await c.req.json()
         const validData = updateUserSchema.parse(body)
         const updatedUser = await service.updateUser(userId, validData)
         return util.successResponseHT(c, updatedUser, userLinks(updatedUser.id), "data user berhasil diupdate")

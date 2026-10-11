@@ -6,6 +6,9 @@ const userRoutes = new Hono()
 // get spesific user
 userRoutes.get('/search', controller.getSpesificUserHandler)
 
+// create user
+userRoutes.post('/', controller.createUserHandler)
+
 // get all users
 userRoutes.get('/', controller.getUsersHandler)
 
