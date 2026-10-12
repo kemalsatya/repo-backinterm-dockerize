@@ -1,4 +1,4 @@
-service:
+services:
   backend:
     build: .
     ports:
@@ -6,6 +6,7 @@ service:
     environment:
       PORT: 8500
       NODE_ENV: production
+      MONGO_DB: ${MONGO_DB}
       MONGO_URI: mongodb://mongo:27017/${MONGO_DB}
     depends_on:
       mongo:
