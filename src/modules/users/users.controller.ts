@@ -37,9 +37,9 @@ export const getUsersHandler = async (c: Context) => {
 export const getSpesificUserHandler = async (c: Context) => {
     try {
         const { name:nameTarget, email:emailTarget } = userSchema.parse(c.req.query())
-        const usersLink = [link.collection('/api/users'), link.rel('tasks', `/api/tasks?assignedTo=$userId`)]
-
         const userSearched = await service.searchUser(nameTarget, emailTarget)
+        const usersLink = [link.collection('/api/users'), link.rel('tasks', `/api/tasks?assignedTo=${userSearched._id}`)]
+
         return util.successResponseHT(c, userSearched, usersLink, "data user berhasil diambil")
     } catch (error: any) {
         return util.errorResponse(c, error.message, error.cause?.status)

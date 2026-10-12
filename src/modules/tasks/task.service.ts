@@ -6,11 +6,16 @@ export const createTask = async (data: createTaskDTO) => {
     return task
 }
 
-export const getAllTask = async (page: number = 1, limit: number = 10) => {
+export const getAllTask = async (page: number = 1, limit: number = 10, assignedTo?: string) => {
     const skip = (page-1) * limit
+    const filter: Record<string, any> = {}
+    if (assignedTo) {
+        filter.assignedTo = assignedTo
+    }
+
     const [tasks, totalItems] = await Promise.all([
-        taskModel.find().skip(skip).limit(limit).lean(),
-        taskModel.countDocuments()
+        taskModel.find(filter).skip(skip).limit(limit).lean(),
+        taskModel.countDocuments(filter)
     ])
 
     const totalPages = Math.ceil(totalItems / limit)

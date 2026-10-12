@@ -1,4 +1,5 @@
 import z from "zod";
+import { paginationQuerySchema } from "@/utils/pagination.util";
 
 const taskHistorySchema = z.object({
     field: z.string(),
@@ -27,8 +28,16 @@ export const assignTaskSchema = z.object({
     userId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid")
 })
 
+export const taskQuerySchema = paginationQuerySchema.extend({
+    assignedTo: z.preprocess(
+        (val) => (val === "" ? undefined : val),
+        z.string().regex(/^[0-9a-fA-F]{24}$/, "Format ID MongoDB tidak valid").optional()
+    )
+})
+
 export const createTaskSchema = taskSchema.omit({taskId: true, history: true, createdAt: true, updatedAt: true})
 export const updateTaskSchema = createTaskSchema.partial()
 
 export type createTaskDTO = z.infer<typeof createTaskSchema>
 export type updateTaskDTO = z.infer<typeof updateTaskSchema>
+export type taskQueryDTO = z.infer<typeof taskQuerySchema>

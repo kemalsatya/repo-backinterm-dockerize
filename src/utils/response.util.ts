@@ -3,14 +3,15 @@ import { link, type HateoasLink } from './hateoas.util';
 import type { paginationMeta } from './pagination.util';
 
 
-export const paginationLinks = (page: number, limit: number, totalPages: number, api: string) => {
+export const paginationLinks = (page: number, limit: number, totalPages: number, api: string, extraQuery: string = "") => {
+    const querySuffix = extraQuery ? `&${extraQuery}` : ""
     const links = [
-        link.self(`/api/${api}?page=${page}&limit=${limit}`),
+        link.self(`/api/${api}?page=${page}&limit=${limit}${querySuffix}`),
         link.create(`/api/${api}`)
     ]
 
-    if (page > 1) links.push(link.prev(`/api/${api}?page=${page - 1}&limit=${limit}`))
-    if (page < totalPages) links.push(link.next(`/api/${api}?page=${page + 1}&limit=${limit}`))
+    if (page > 1) links.push(link.prev(`/api/${api}?page=${page - 1}&limit=${limit}${querySuffix}`))
+    if (page < totalPages) links.push(link.next(`/api/${api}?page=${page + 1}&limit=${limit}${querySuffix}`))
 
     return links
 }

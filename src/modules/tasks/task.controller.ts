@@ -3,9 +3,8 @@ import * as service from './task.service'
 import * as userService from '@/modules/users/users.service'
 import * as util from "@/utils/response.util"
 import { paramIdSchema } from "@/modules/projects/project.validator";
-import { assignTaskSchema, createTaskSchema } from "./task.validator";
+import { assignTaskSchema, createTaskSchema, taskQuerySchema } from "./task.validator";
 import { paginationLinks } from "@/utils/response.util";
-import { paginationQuerySchema } from "@/utils/pagination.util";
 import { link } from "@/utils/hateoas.util";
 
 const taskLinks = (taskId: string, projectId: string) => [
@@ -29,9 +28,10 @@ export const createTaskHandler = async (c: Context) => {
 
 export const getAllTaskHandler = async (c: Context) => {
     try {
-        const { page, limit } = paginationQuerySchema.parse(c.req.query())
-        const allTask = await service.getAllTask(page, limit)
-        const links = paginationLinks(allTask.currentPage, allTask.limit, allTask.totalPages, "tasks")
+        const { page, limit, assignedTo } = taskQuerySchema.parse(c.req.query())
+        const allTask = await service.getAllTask(page, limit, assignedTo)
+        const extraQuery = assignedTo ? `assignedTo=${assignedTo}` : ""
+        const links = paginationLinks(allTask.currentPage, allTask.limit, allTask.totalPages, "tasks", extraQuery)
         return util.successResponseHTPaginated(c, allTask.tasks, {page: allTask.currentPage, limit: allTask.limit, totalItems: allTask.totalItems, totalPages: allTask.totalPages},links, "Berhasil mengambil semua task")
     } catch (error: any) {
         return util.errorResponse(c, error.message)
