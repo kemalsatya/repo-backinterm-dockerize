@@ -4,7 +4,7 @@ Backend Aplikasi RESTful API untuk manajemen User, Project, dan Task yang dibang
 
 ---
 
-## 📋 Prasyarat Sistem 
+## Prasyarat Sistem 
 
 Sebelum menjalankan aplikasi ini, pastikan sistem/perangkat Anda telah terpasang perangkat lunak berikut:
 
@@ -157,3 +157,6 @@ Untuk membuktikan bahwa volume Docker (`mongo_data`) mempertahankan data saat co
    ```
 6. **Verifikasi ulang data**:
    Akses kembali `GET http://localhost:8500/api/tasks` untuk verifikasi data yang ada.
+
+## Referensi dan Bantuan
+Dalam repo ini, digunakan beberapa sumber untuk membantu pengerjaan kode, seperti npm untuk package yang digunakan, bun, hono, docker dan mongoose. Adapun dalam pengerjaan repo ini, AI digunakan untuk generate dan implement openapi, seed data dan membuat readme.

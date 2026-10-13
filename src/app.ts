@@ -5,7 +5,6 @@ import openApiSpec from '@/docs/openapi.json'
 
 const app = new Hono()
 
-// Mount routes
 app.get("/health", (c) => c.json({ success: true, message: "endpoint berhasil diakses"}))
 
 // Scalar API Reference documentation & OpenAPI spec
