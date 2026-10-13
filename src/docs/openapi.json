@@ -1,0 +1,1298 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Task Management API",
+    "version": "1.0.0",
+    "description": "Dokumentasi RESTful API untuk User, Project, dan Task Management yang dibangun dengan Hono & Bun."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8500",
+      "description": "Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "System",
+      "description": "Endpoint sistem dan health check"
+    },
+    {
+      "name": "Users",
+      "description": "Manajemen data pengguna"
+    },
+    {
+      "name": "Projects",
+      "description": "Manajemen data project"
+    },
+    {
+      "name": "Tasks",
+      "description": "Manajemen data task dan penugasan"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check service",
+        "description": "Memeriksa status kesehatan server",
+        "responses": {
+          "200": {
+            "description": "Server berjalan dengan baik",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Mendapatkan semua data user",
+        "description": "Mengambil seluruh daftar user yang tersimpan di database beserta link HATEOAS",
+        "responses": {
+          "200": {
+            "description": "Berhasil mengambil data users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Membuat user baru",
+        "description": "Mendaftarkan user baru dengan nama dan email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Validasi gagal atau kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/search": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Mencari user spesifik berdasarkan nama & email",
+        "description": "Mencari user tunggal yang cocok dengan parameter query name dan email",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "John Doe"
+            },
+            "description": "Nama user yang dicari"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "example": "john@example.com"
+            },
+            "description": "Email user yang dicari"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data user ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "description": "ID MongoDB User"
+        }
+      ],
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Memperbarui data user",
+        "description": "Mengubah data parsial nama atau email user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data user berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Validasi gagal atau kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Menghapus user",
+        "description": "Menghapus user berdasarkan ID",
+        "responses": {
+          "200": {
+            "description": "User berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "User tidak ditemukan atau kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "tags": ["Projects"],
+        "summary": "Mendapatkan daftar project (Pagination)",
+        "description": "Mengambil daftar project dengan paginasi halaman dan limit",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            },
+            "description": "Nomor halaman saat ini"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Jumlah item per halaman"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil mengambil semua project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectPaginatedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Projects"],
+        "summary": "Membuat project baru",
+        "description": "Menambahkan data project baru yang dikaitkan dengan user pembuat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Validasi gagal atau kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "description": "ID MongoDB Project"
+        }
+      ],
+      "get": {
+        "tags": ["Projects"],
+        "summary": "Mendapatkan detail project",
+        "description": "Mengambil satu project berdasarkan ID",
+        "responses": {
+          "200": {
+            "description": "Data project berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Projects"],
+        "summary": "Memperbarui project",
+        "description": "Memperbarui nama dan/atau deskripsi project",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project berhasil diupdate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Projects"],
+        "summary": "Menghapus project",
+        "description": "Menghapus project berdasarkan ID",
+        "responses": {
+          "200": {
+            "description": "Project berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Mendapatkan daftar task (Pagination & Filter)",
+        "description": "Mengambil daftar task dengan paginasi dan filter opsional berdasarkan assignedTo",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            },
+            "description": "Halaman saat ini"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Limit data per halaman"
+          },
+          {
+            "name": "assignedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/MongoId"
+            },
+            "description": "Filter task berdasarkan ID user assignee"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil mengambil semua task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskPaginatedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tasks"],
+        "summary": "Membuat task baru",
+        "description": "Menambahkan task baru ke dalam suatu project",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Validasi gagal atau kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "description": "ID MongoDB Task"
+        }
+      ],
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Mendapatkan detail task",
+        "description": "Mengambil data task spesifik berdasarkan ID",
+        "responses": {
+          "200": {
+            "description": "Data spesifik task berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Tasks"],
+        "summary": "Memperbarui task",
+        "description": "Memperbarui sebagian atau seluruh data task",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data task berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Tasks"],
+        "summary": "Menghapus task",
+        "description": "Menghapus task berdasarkan ID",
+        "responses": {
+          "200": {
+            "description": "Task telah berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}/assign": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "description": "ID MongoDB Task"
+        }
+      ],
+      "patch": {
+        "tags": ["Tasks"],
+        "summary": "Menugaskan task ke user (Assign)",
+        "description": "Mengubah assignee pada task yang dituju",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignTaskInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task berhasil diassign",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User atau task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Kesalahan server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MongoId": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$",
+        "example": "660c1d68a9cfba1234567890",
+        "description": "24 Karakter Heksadesimal MongoDB ObjectId"
+      },
+      "HateoasLink": {
+        "type": "object",
+        "properties": {
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "href": {
+            "type": "string",
+            "example": "/api/users/660c1d68a9cfba1234567890"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            "example": "GET"
+          }
+        },
+        "required": ["rel", "href", "method"]
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 25
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 3
+          }
+        },
+        "required": ["page", "limit", "totalItems", "totalPages"]
+      },
+      "CreateUserInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Kemal Adrian"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "kemal@example.com"
+          }
+        },
+        "required": ["name", "email"]
+      },
+      "UpdateUserInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Kemal Adrian Updated"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "kemal_updated@example.com"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Kemal Adrian"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "kemal@example.com"
+          }
+        }
+      },
+      "CreateProjectInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Proyek Backend Docker"
+          },
+          "description": {
+            "type": "string",
+            "example": "Aplikasi manajemen task dengan microservices"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/MongoId"
+          }
+        },
+        "required": ["name", "createdBy"]
+      },
+      "UpdateProjectInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Proyek Backend Docker - Revisi"
+          },
+          "description": {
+            "type": "string",
+            "example": "Deskripsi baru untuk proyek"
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Proyek Backend Docker"
+          },
+          "description": {
+            "type": "string",
+            "example": "Aplikasi manajemen task dengan microservices"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TaskHistory": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "status"
+          },
+          "oldValue": {},
+          "newValue": {},
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateTaskInput": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "title": {
+            "type": "string",
+            "example": "Setup Scalar & OpenAPI"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["todo", "in progress", "completed"],
+            "default": "todo"
+          },
+          "assignedTo": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "subTask": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MongoId"
+            }
+          },
+          "description": {
+            "type": "string",
+            "example": "Dokumentasikan semua endpoint menggunakan Scalar"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "default": "low"
+          },
+          "tags": {
+            "type": "string",
+            "example": "backend, documentation"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-20T17:00:00.000Z"
+          }
+        },
+        "required": ["projectId", "title"]
+      },
+      "UpdateTaskInput": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["todo", "in progress", "completed"]
+          },
+          "assignedTo": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "subTask": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MongoId"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "tags": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AssignTaskInput": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/MongoId"
+          }
+        },
+        "required": ["userId"]
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "title": {
+            "type": "string",
+            "example": "Setup Scalar & OpenAPI"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["todo", "in progress", "completed"]
+          },
+          "assignedTo": {
+            "$ref": "#/components/schemas/MongoId"
+          },
+          "subTask": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MongoId"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "tags": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskHistory"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "endpoint berhasil diakses"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "user berhasil dibuat"
+          },
+          "data": {
+            "$ref": "#/components/schemas/User"
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "UserListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "data users berhasil diambil"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "ProjectResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Project berhasil dibuat"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Project"
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "ProjectPaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Berhasil mengambil semua project"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Task berhasil dibuat"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Task"
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "TaskPaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Berhasil mengambil semua task"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HateoasLink"
+            }
+          }
+        }
+      },
+      "DeleteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Data telah berhasil dihapus"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "data": {
+            "nullable": true,
+            "example": null
+          }
+        }
+      }
+    }
+  }
+}
