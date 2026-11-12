@@ -67,7 +67,7 @@ docker compose logs -f
 # Menghentikan container
 docker compose down
 ```
-Setelah berjalan, aplikasi dapat diakses di `http://localhost:8500`.
+Setelah berjalan, aplikasi dapat diakses di `http://localhost:8080`sebagai entri.
 
 ---
 
@@ -88,7 +88,7 @@ Pastikan MongoDB lokal atau MongoDB Atlas Anda sudah aktif dan terhubung di `.en
    bun start
    ```
 
-Aplikasi akan berjalan pada port yang telah dikonfigurasi (default: `http://localhost:8500`).
+Aplikasi akan berjalan pada port yang telah dikonfigurasi (default: `http://localhost:8080`).
 
 ---
 
@@ -98,14 +98,14 @@ Setelah server berjalan, Anda dapat memverifikasi status dan mencoba seluruh end
 
 1. **Health Check Endpoint**:
    ```bash
-   curl http://localhost:8500/health
+   curl http://localhost:8080/health
    ```
    Respons: `{"success": true, "message": "endpoint berhasil diakses"}`
 
 2. **Scalar Interactive API Documentation**:
    Buka di browser:
-   * **UI Dokumentasi Interaktif**: [http://localhost:8500/docs](http://localhost:8500/docs) (atau `/reference`)
-   * **OpenAPI 3.1 Spec (Raw JSON)**: [http://localhost:8500/openapi.json](http://localhost:8500/openapi.json)
+   * **UI Dokumentasi Interaktif**: [http://localhost:8080/docs](http://localhost:8080/docs) (atau `/reference`)
+   * **OpenAPI 3.1 Spec (Raw JSON)**: [http://localhost:8080/openapi.json](http://localhost:8080/openapi.json)
 
 ---
 
@@ -146,7 +146,7 @@ Untuk membuktikan bahwa volume Docker (`mongo_data`) mempertahankan data saat co
    docker compose exec backend bun run seed
    ```
 3. **Verifikasi data awal**:
-   Akses `GET http://localhost:8500/api/tasks` atau cek lewat Scalar UI di `http://localhost:8500/docs`. Seluruh data endpoint task, project, dan user akan muncul.
+   Akses `GET http://localhost:8080/api/tasks` atau cek lewat Scalar UI di `http://localhost:8080/docs`. Seluruh data endpoint task, project, dan user akan muncul.
 4. **Hentikan dan hapus container** *(tanpa flag `-v`)*:
    ```bash
    docker compose down
@@ -156,7 +156,56 @@ Untuk membuktikan bahwa volume Docker (`mongo_data`) mempertahankan data saat co
    docker compose up -d
    ```
 6. **Verifikasi ulang data**:
-   Akses kembali `GET http://localhost:8500/api/tasks` untuk verifikasi data yang ada.
+   Akses kembali `GET http://localhost:8080/api/tasks` untuk verifikasi data yang ada.
+
+### Testing NGINX
+1. Test Load Balancer
+```
+~$ for i in {1..6}; do curl -sI http://localhost:8080/api/projects | grep X-Upstream; done
+X-Upstream: 172.20.0.4:8500
+X-Upstream: 172.20.0.3:8500
+X-Upstream: 172.20.0.5:8500
+X-Upstream: 172.20.0.4:8500
+X-Upstream: 172.20.0.3:8500
+X-Upstream: 172.20.0.5:8500
+
+```
+
+2. Test rate limit
+```
+~$ for i in {1..10}; do curl -sI http://localhost:8080/api/users | grep HTTP; done
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+HTTP/1.1 429 Too Many Requests
+HTTP/1.1 429 Too Many Requests
+HTTP/1.1 429 Too Many Requests
+HTTP/1.1 200 OK
+HTTP/1.1 429 Too Many Requests
+HTTP/1.1 429 Too Many Requests
+```
+
+3. Test Header Keamanan dan Gzip
+```
+~$ curl -sI -X GET -H "Accept-Encoding: gzip" http://localhost:8080/api/users
+HTTP/1.1 200 OK
+Server: nginx
+Date: Thu, 12 Nov 2026 03:44:32 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+X-Upstream: 172.20.0.3:8500
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Content-Encoding: gzip
+```
+
+4. Testing satu pintu
+```
+~$ curl -sI http://localhost:8500/api/users
+[ble: exit 7]
+```
 
 ## Referensi dan Bantuan
 Dalam repo ini, digunakan beberapa sumber untuk membantu pengerjaan kode, seperti npm untuk package yang digunakan, bun, hono, docker dan mongoose. Adapun dalam pengerjaan repo ini, AI digunakan untuk generate dan implement openapi, seed data dan membuat readme.
