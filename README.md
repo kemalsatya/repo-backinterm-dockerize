@@ -71,7 +71,7 @@ Setelah berjalan, aplikasi dapat diakses di `http://localhost:8080`sebagai entri
 
 ---
 
-### Metode B: Menjalankan Secara Lokal (Menggunakan Bun)
+### Metode B: Menjalankan Secara Lokal
 Pastikan MongoDB lokal atau MongoDB Atlas Anda sudah aktif dan terhubung di `.env`.
 
 1. **Install dependensi**:
@@ -158,7 +158,9 @@ Untuk membuktikan bahwa volume Docker (`mongo_data`) mempertahankan data saat co
 6. **Verifikasi ulang data**:
    Akses kembali `GET http://localhost:8080/api/tasks` untuk verifikasi data yang ada.
 
-### Testing NGINX
+---
+## Testing NGINX
+
 1. Test Load Balancer
 ```
 ~$ for i in {1..6}; do curl -sI http://localhost:8080/api/projects | grep X-Upstream; done
@@ -206,6 +208,17 @@ Content-Encoding: gzip
 ~$ curl -sI http://localhost:8500/api/users
 [ble: exit 7]
 ```
+
+---
+## QnA
+
+(a) Kenapa upstream perlu zone? Apa yang terjadi kalau dihapus? 
+
+(b) Kenapa limit_req_status diganti ke 429? Apa bedanya dengan bawaan nginx? 
+
+(c) Kenapa backend dan database tidak punya ports, dan nginx menjangkau backend lewat apa?
+
+= Zone merupakan shared memory antar _worker_ NGINX untuk pengaturan _upstream_ dan mendukung fitur rate limiting sehingga bila dihapus akan mengacaukan pembagian _load balancing_ yang ada. Direktif `limit_req_status` dalam NGINX punya status code 503 Service Unavailable yang lebih dimaknai sebagai adanya kesalahan pada server sehingga penggunaan status code 429 menjadi lebih representatif bahwa klien terkena _rate limit_. Backend dan database tidak memiliki port bertujuan untuk pembatasan akses dari luar dan memaksa trafik datang hanya dari NGINX sebagai pintu utama. NGINX lalu berkomunikasi dengan backend melalui jaringan internal Docker Compose dengan konfigurasi melalui `upstream`.
 
 ## Referensi dan Bantuan
 Dalam repo ini, digunakan beberapa sumber untuk membantu pengerjaan kode, seperti npm untuk package yang digunakan, bun, hono, docker dan mongoose. Adapun dalam pengerjaan repo ini, AI digunakan untuk generate dan implement openapi, seed data dan membuat readme.
